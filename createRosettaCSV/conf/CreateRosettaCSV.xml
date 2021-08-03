@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<properties>
+
+<!-- 
+IMPORTANT
+requirements for the provided CSV:
+  - separator is comma (,)
+  - first column must have header 'Filename for matching' (can contain multiple base names separated by pipe |)
+  - first line contains header
+  - header values must not contain comma
+  - there can be only one line for object type SIP
+  - COLLECTION lines are currently not supported
+  - there is exact one line per IE
+  - there are no other lines than for object type SIP or IE
+  - all columns that should be filled by the tool MUST NOT already exist in the original CSV:
+    Preservation Type, File Original Path, File Original Name, File Label
+'Preservation Type' will be the SAME as the folder name that contains the streams of this representation
+   and are configured in <repfolder> (e.g. <repfolder>PRESERVATION_MASTER,MODIFIED_MASTER,DERIVATIVE_COPY</repfolder>)
+'File Original Path'
+   Unix: depends on <addfullpath>
+   Windows: the representation folder name, optionally preceded by the path configured in <nfspathtostreams> 
+'File Original Name' will be the file name
+'File Label' can be extracted from file name
+
+Output:
+on Windows PC: converted CSV file (and optional ZIP file containing stream files)
+on Unix server: SIP directory with expected structure and converted CSV file
+ -->
+
+<section name="source">
+  <!-- <sourcerootcsv>: folder containing the CSV file for transformation: -->
+  <sourcerootcsv>example\CSV_source\</sourcerootcsv>
+  
+  <!-- <sourcerootfiles>: folders containing subfolders for each type of representation: -->
+  <sourcerootfiles>example\files_source</sourcerootfiles>
+  
+  <!-- <repfolder>:
+  - subfolders containing file streams
+  - the subfolder name also defines the 'Preservation Type' of the representation
+  - multiple types are separated by comma
+  -->
+  <repfolder>PRESERVATION_MASTER,MODIFIED_MASTER,DERIVATIVE_COPY</repfolder>
+
+  <!-- <labelregex>:
+  - regular expression that will be used to extract 'File Label' from 'File Original Name'
+  - if missing or empty, 'File Original Name' will be copied to 'File Label'
+  Example:
+    file name: xxxx_yyyy_label.jpg
+    labelregex: ^.*?_.*?_(.*?)\..*$
+    results in: label
+  - the value in brackets will be used as label
+  - only one group, i.e. pair of brackets, is supported
+  -->
+  <labelregex>^.*_(.*?)\..*$</labelregex>
+</section>
+
+<section name="general">
+  <!-- <addfullpath>:
+  - only relevant when running the tool on Unix server (not locally in Windows)
+  - true: full path information for source files is written into 'File Original Path'
+  - NOTE: stream files can remain in their original location during deposit
+  - false: relative path for {representation folder} + '/', e.g. 'PRESERVATION_MASTER/' is written into 'File Original Path'
+  - NOTE: stream files must be copied/moved into SIP directory 'content/streams/...'
+  -->
+  <addfullpath>true</addfullpath>
+  
+  <!-- <zipstreamfolder>:
+  - let the tool create a ZIP file of the stream file folders for upload (true / false)
+  - only active on Windows PC
+  -->
+  <zipstreamfolder>true</zipstreamfolder>
+  
+  <!-- <debug>: add debug information to the log (true / false) -->
+  <debug>false</debug>
+</section>
+
+<section name="target">
+  <!-- <targetrootcsv>:
+  - folder containing the CSV file ready for deposit
+  - if <zipstreamfolder> is 'true', this folder will also contain the zipped stream folders
+  -->
+  <targetrootcsv>ready_for_deposit\</targetrootcsv>
+  <!-- <nfspathtostreams>:
+  - absolute path to the NFS directory on the Unix server, containing the representation folders and stream files
+  - this path is added as prefix to the 'File Original Path' column
+  - only active when running the tool in Windows and parameter 'zipstreamfolder' is set to 'false'
+  - NOTE: Representation folders with stream files must be uploaded into this location on the server 
+  -->
+  <nfspathtostreams>/local_deposit_storage/ESL_all_stream_directories/</nfspathtostreams>
+</section>
+
+</properties>
